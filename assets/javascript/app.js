@@ -6,7 +6,7 @@ $(document).ready(function () {
     // Array of topics
     var topics = ["sharks", "elephants", "baboons", "turtle"];
 
-     // Functions
+    // Functions
     // ====================================================================================================
 
     // renders the gif to the HTML
@@ -22,10 +22,9 @@ $(document).ready(function () {
             url: queryURL,
             method: "GET"
         })
-           
+
             .then(function (response) {
-                console.log(response)
-                console.log(gif)
+                console.log(response);
 
                 // storing an array of results in a results variable
                 var results = response.data;
@@ -45,80 +44,82 @@ $(document).ready(function () {
                     // display the rating
                     gifDiv.append(pOne);
 
-                    // get the url for the image
-                    var stillImageURL = results[i].images.fixed_height_still.url;
-
-
-                    // // get the animated images URL
-                    var animatedImageURL = results[i].images.fixed_height.url;
-
-
-                    // creating an image elenement to hold the animated image URL
-                    var animatedImage = $("<img>").attr("src", animatedImageURL)
-
 
                     // creating an image element to hold the imageURL
-                    var stillImage = $("<img class=image>").attr("src", stillImageURL);
-
-
+                    var image = $("<img>");
+                 
+                    image.attr("src", results[i].images.original_still.url);
+                    image.attr("data-still", results[i].images.original_still.url)
+                    image.attr("data-animate", results[i].images.original.url)
+                    image.attr("data-state", "still")
+                    image.attr("class", "gif")
+                    console.log(image)
                     // appending the image
-                    gifDiv.append(stillImage);
+                    gifDiv.append(image);
 
                     // appending to the DOM
                     $("#gif-container").prepend(gifDiv);
                 }
-                function animateGif() {
-
-                    $(".image").on("click", function () {
-                        if ($(this).attr("src", stillImageURL)) { $(this).attr("src", animatedImageURL) }
-                        else if ($(this).attr("src", animatedImageURL)) { $(this).attr("src", animatedImageURL) }
-                    });
-                }
-
-                animateGif();
-
             });
     }
+// function animates the gif
+    function animateGif() {
+        var state = $(this).attr("data-state");
+        var animateImage = $(this).attr("data-animate");
+        var stillImage = $(this).attr("data-still");
 
-    // function for displaying gif data
+        if (state == "still") {
+            $(this).attr("src", animateImage);
+            $(this).attr("data-state", "animate");
+
+        }
+        else if (state == "animate") {
+            $(this).attr("src", stillImage);
+            $(this).attr("data-state", "still");
+        }
+    }
+
+    // function for displaying buttons
     function renderButtons() {
 
         // clears gifs to avoid having repeat gifs
         $("#button-container").empty();
-
         // loop through the array of topics
         for (var i = 0; i < topics.length; i++) {
-
-            // generate a button for each movie in array
+            // generate a button for each topic in array
             var a = $("<button>");
             // adding a class of gif-button to the button
-            a.addClass("gif-button");
-            // adding a data-attr
+            a.addClass("gif-button btn btn-warning");
+            // adding a data-attr to the topics
             a.attr("data-name", topics[i]);
             // update the button text
             a.text(topics[i]);
             // add the buttons to the button div
             $("#button-container").append(a);
         }
+
     }
 
-    // Function handles events when button is clicked
+    // Function to add a new button
     $("#add-button").on("click", function (event) {
         event.preventDefault();
         // Grabs the input from the textbox
         var topic = $("#button-input").val().trim();
 
-        // adding a gif from the textbox of array
+        // adding a topic to the array from the user input 
         topics.push(topic);
-
+        // Calls reneder function
         renderButtons();
 
     });
 
     // adding an event listener to all the elements with a class of gif-button
     $(document).on("click", ".gif-button", displayGiphy);
+    $(document).on("click", ".gif", animateGif);
 
     renderButtons();
+
+   
 
 
 
